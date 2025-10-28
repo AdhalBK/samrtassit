@@ -57,11 +57,9 @@ def update_timer():
     if st.session_state.running and st.session_state.timer_seconds > 0:
         st.session_state.timer_seconds -= 1
         time.sleep(1)
-        st.experimental_rerun()
 
 def start_timer():
     st.session_state.running = True
-    st.experimental_rerun()
 
 def stop_timer():
     st.session_state.running = False
@@ -127,7 +125,6 @@ if st.session_state.show_tutorial:
         """)
     if st.button("Got it! Start using the app"):
         st.session_state.show_tutorial = False
-        st.experimental_rerun()
     st.stop()
 
 # App title
@@ -182,7 +179,6 @@ with cols_q[0]:
 with cols_q[1]:
     if st.button("🔄 New Quote"):
         st.session_state.quote = get_gemini_quote()
-        st.experimental_rerun()
 
 # ----------------------------
 # Text-to-Speech from Text Input
@@ -222,7 +218,6 @@ new_task = st.text_input("Add new task:")
 if st.button("Add Task") and new_task:
     st.session_state.tasks.append({"task": new_task, "done": False})
     save_tasks()
-    st.experimental_rerun()
 
 for i, item in enumerate(st.session_state.tasks.copy()):
     cols = st.columns([0.05, 0.6, 0.2, 0.15])
@@ -251,7 +246,6 @@ for i, item in enumerate(st.session_state.tasks.copy()):
     if cols[3].button("🗑️ Delete", key=f"delete_task_{i}"):
         st.session_state.tasks.pop(i)
         save_tasks()
-        st.experimental_rerun()
 
 # Background image
 st.subheader("🖼️ Upload Background Image")
@@ -259,7 +253,6 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png"])
 if uploaded_file is not None:
     image_data = uploaded_file.read()
     st.session_state.background = base64.b64encode(image_data).decode()
-    st.experimental_rerun()
 
 # Support Center
 st.subheader("📞 Support Center")
