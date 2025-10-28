@@ -7,6 +7,8 @@ import os
 import json
 import base64
 import google.generativeai as genai
+from pydub import AudioSegment
+import io
 
 # Gemini API Key
 GEMINI_API_KEY = "AIzaSyAvJhi8kIqaWFSX2Z3Dumd-hCQKwjnYTJc"
@@ -77,13 +79,23 @@ def speak(text):
     tts.save("voice.mp3")
     st.audio("voice.mp3", autoplay=True)
 
-# Voice recognition from uploaded audio
+# Voice recognition with format conversion
 def recognize_audio(uploaded_file):
     recognizer = sr.Recognizer()
     try:
-        with sr.AudioFile(uploaded_file) as source:
-            audio = recognizer.record(source)
-            text = recognizer.recognize_google(audio)
+        # Convert to WAV if necessary
+        file_extension = uploaded_file.name.split(".")[-1].lower()
+        if file_extension != "wav":
+            audio = AudioSegment.from_file(uploaded_file)
+            wav_io = io.BytesIO()
+            audio.export(wav_io, format="wav")
+            wav_io.seek(0)
+        else:
+            wav_io = uploaded_file
+
+        with sr.AudioFile(wav_io) as source:
+            audio_data = recognizer.record(source)
+            text = recognizer.recognize_google(audio_data)
             return text
     except sr.UnknownValueError:
         return "Sorry, I couldn't understand the audio."
@@ -214,9 +226,7 @@ if uploaded_audio is not None:
     if st.button("🔊 Speak Recognized Text"):
         speak(recognized_text)
 
-# ----------------------------
 # Text-to-Speech from Text Input
-# ----------------------------
 st.subheader("🔊 Text-to-Speech from Text")
 text_to_speak = st.text_area("Enter text to convert to audio:")
 if st.button("Convert to Speech") and text_to_speak:
@@ -290,6 +300,13 @@ if uploaded_file is not None:
     image_data = uploaded_file.read()
     st.session_state.background = base64.b64encode(image_data).decode()
     st.experimental_rerun()
+
+# Support Center
+st.subheader("📞 Support Center")
+st.markdown("""
+- Phone: **8590495657**  
+- Email: **adhalbkl@gmail.com**
+""")
 
 # Update timer
 if st.session_state.running:
