@@ -1,14 +1,11 @@
 import streamlit as st
 import time
 from gtts import gTTS
-import speech_recognition as sr
 from datetime import datetime
 import os
 import json
 import base64
 import google.generativeai as genai
-from pydub import AudioSegment
-import io
 
 # Gemini API Key
 GEMINI_API_KEY = "AIzaSyAvJhi8kIqaWFSX2Z3Dumd-hCQKwjnYTJc"
@@ -73,35 +70,6 @@ def reset_timer():
     st.session_state.timer_seconds = st.session_state.custom_minutes * 60
     st.session_state.running = False
 
-# Text-to-Speech
-def speak(text):
-    tts = gTTS(text=text, lang='en')
-    tts.save("voice.mp3")
-    st.audio("voice.mp3", autoplay=True)
-
-# Voice recognition with format conversion
-def recognize_audio(uploaded_file):
-    recognizer = sr.Recognizer()
-    try:
-        # Convert to WAV if necessary
-        file_extension = uploaded_file.name.split(".")[-1].lower()
-        if file_extension != "wav":
-            audio = AudioSegment.from_file(uploaded_file)
-            wav_io = io.BytesIO()
-            audio.export(wav_io, format="wav")
-            wav_io.seek(0)
-        else:
-            wav_io = uploaded_file
-
-        with sr.AudioFile(wav_io) as source:
-            audio_data = recognizer.record(source)
-            text = recognizer.recognize_google(audio_data)
-            return text
-    except sr.UnknownValueError:
-        return "Sorry, I couldn't understand the audio."
-    except sr.RequestError:
-        return "API request error. Try again."
-
 # Gemini quote
 def get_gemini_quote():
     try:
@@ -154,7 +122,6 @@ if st.session_state.show_tutorial:
         - ⏳ Use the Pomodoro timer to focus.
         - 🧠 Ask questions using Gemini AI.
         - 📝 Add tasks and let the assistant help or remind you.
-        - 🎙 Upload audio for voice recognition.
         - 🔊 Enter text to convert to audio.
         - 🌄 Upload a background to customize.
         """)
@@ -217,16 +184,9 @@ with cols_q[1]:
         st.session_state.quote = get_gemini_quote()
         st.experimental_rerun()
 
-# Voice Assistant with audio upload
-st.subheader("🎙️ Voice Assistant (Upload Audio)")
-uploaded_audio = st.file_uploader("Upload a .wav or .mp3 file for voice recognition:", type=["wav", "mp3"])
-if uploaded_audio is not None:
-    recognized_text = recognize_audio(uploaded_audio)
-    st.success(f"Recognized Text: {recognized_text}")
-    if st.button("🔊 Speak Recognized Text"):
-        speak(recognized_text)
-
+# ----------------------------
 # Text-to-Speech from Text Input
+# ----------------------------
 st.subheader("🔊 Text-to-Speech from Text")
 text_to_speak = st.text_area("Enter text to convert to audio:")
 if st.button("Convert to Speech") and text_to_speak:
@@ -304,8 +264,10 @@ if uploaded_file is not None:
 # Support Center
 st.subheader("📞 Support Center")
 st.markdown("""
-- Phone: **8590495657**  
-- Email: **adhalbkl@gmail.com**
+**Contact us:**  
+- 📧 Email: adhalbkl@gmail.com  
+- 📱 Phone: 8590495657  
+For any help or issues, feel free to reach out!
 """)
 
 # Update timer
