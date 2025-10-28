@@ -1,7 +1,6 @@
 import streamlit as st
 import time
 from gtts import gTTS
-import speech_recognition as sr
 from datetime import datetime
 import os
 import json
@@ -58,11 +57,11 @@ def update_timer():
     if st.session_state.running and st.session_state.timer_seconds > 0:
         st.session_state.timer_seconds -= 1
         time.sleep(1)
-        st.rerun()
+        st.experimental_rerun()
 
 def start_timer():
     st.session_state.running = True
-    st.rerun()
+    st.experimental_rerun()
 
 def stop_timer():
     st.session_state.running = False
@@ -71,26 +70,11 @@ def reset_timer():
     st.session_state.timer_seconds = st.session_state.custom_minutes * 60
     st.session_state.running = False
 
-# ✅ New TTS (Google TTS)
+# ✅ TTS (Google TTS)
 def speak(text):
     tts = gTTS(text=text, lang='en')
     tts.save("voice.mp3")
     st.audio("voice.mp3", autoplay=True)
-
-# Voice Assistant
-def voice_assistant():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.info("Listening...")
-        try:
-            audio = recognizer.listen(source, timeout=15)
-            text = recognizer.recognize_google(audio)
-            st.success(f"You said: {text}")
-            speak(text)
-        except sr.UnknownValueError:
-            st.warning("Sorry, I couldn't understand.")
-        except sr.RequestError:
-            st.warning("API request error.")
 
 # Gemini quote
 def get_gemini_quote():
@@ -144,12 +128,11 @@ if st.session_state.show_tutorial:
         - ⏳ Use the Pomodoro timer to focus.
         - 🧠 Ask questions using Gemini AI.
         - 📝 Add tasks and let the assistant help or remind you.
-        - 🎙 Use voice input.
         - 🌄 Upload a background to customize.
         """)
     if st.button("Got it! Start using the app"):
         st.session_state.show_tutorial = False
-        st.rerun()
+        st.experimental_rerun()
     st.stop()
 
 # App title
@@ -204,12 +187,7 @@ with cols_q[0]:
 with cols_q[1]:
     if st.button("🔄 New Quote"):
         st.session_state.quote = get_gemini_quote()
-        st.rerun()
-
-# Voice Assistant
-st.subheader("🎙️ Voice Assistant")
-if st.button("Speak"):
-    voice_assistant()
+        st.experimental_rerun()
 
 # Ask Gemini
 st.subheader("💬 Ask Gemini AI")
@@ -238,7 +216,7 @@ new_task = st.text_input("Add new task:")
 if st.button("Add Task") and new_task:
     st.session_state.tasks.append({"task": new_task, "done": False})
     save_tasks()
-    st.rerun()
+    st.experimental_rerun()
 
 for i, item in enumerate(st.session_state.tasks.copy()):
     cols = st.columns([0.05, 0.6, 0.2, 0.15])
@@ -267,7 +245,7 @@ for i, item in enumerate(st.session_state.tasks.copy()):
     if cols[3].button("🗑️ Delete", key=f"delete_task_{i}"):
         st.session_state.tasks.pop(i)
         save_tasks()
-        st.rerun()
+        st.experimental_rerun()
 
 # Background image
 st.subheader("🖼️ Upload Background Image")
@@ -275,7 +253,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "png"])
 if uploaded_file is not None:
     image_data = uploaded_file.read()
     st.session_state.background = base64.b64encode(image_data).decode()
-    st.rerun()
+    st.experimental_rerun()
 
 # Update timer
 if st.session_state.running:
