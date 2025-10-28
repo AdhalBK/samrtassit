@@ -143,6 +143,7 @@ if st.session_state.show_tutorial:
         - 🧠 Ask questions using Gemini AI.
         - 📝 Add tasks and let the assistant help or remind you.
         - 🎙 Upload audio for voice recognition.
+        - 🔊 Enter text to convert to audio.
         - 🌄 Upload a background to customize.
         """)
     if st.button("Got it! Start using the app"):
@@ -212,6 +213,17 @@ if uploaded_audio is not None:
     st.success(f"Recognized Text: {recognized_text}")
     if st.button("🔊 Speak Recognized Text"):
         speak(recognized_text)
+
+# ----------------------------
+# Text-to-Speech from Text Input
+# ----------------------------
+st.subheader("🔊 Text-to-Speech from Text")
+text_to_speak = st.text_area("Enter text to convert to audio:")
+if st.button("Convert to Speech") and text_to_speak:
+    tts = gTTS(text=text_to_speak, lang='en')
+    tts.save("text_audio.mp3")
+    st.success("✅ Audio generated!")
+    st.audio("text_audio.mp3", format="audio/mp3", start_time=0)
 
 # Ask Gemini
 st.subheader("💬 Ask Gemini AI")
