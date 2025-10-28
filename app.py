@@ -1,6 +1,7 @@
 import streamlit as st
 import time
 from gtts import gTTS
+import speech_recognition as sr
 from datetime import datetime
 import os
 import json
@@ -70,11 +71,24 @@ def reset_timer():
     st.session_state.timer_seconds = st.session_state.custom_minutes * 60
     st.session_state.running = False
 
-# ✅ TTS (Google TTS)
+# Text-to-Speech
 def speak(text):
     tts = gTTS(text=text, lang='en')
     tts.save("voice.mp3")
     st.audio("voice.mp3", autoplay=True)
+
+# Voice recognition from uploaded audio
+def recognize_audio(uploaded_file):
+    recognizer = sr.Recognizer()
+    try:
+        with sr.AudioFile(uploaded_file) as source:
+            audio = recognizer.record(source)
+            text = recognizer.recognize_google(audio)
+            return text
+    except sr.UnknownValueError:
+        return "Sorry, I couldn't understand the audio."
+    except sr.RequestError:
+        return "API request error. Try again."
 
 # Gemini quote
 def get_gemini_quote():
@@ -128,6 +142,7 @@ if st.session_state.show_tutorial:
         - ⏳ Use the Pomodoro timer to focus.
         - 🧠 Ask questions using Gemini AI.
         - 📝 Add tasks and let the assistant help or remind you.
+        - 🎙 Upload audio for voice recognition.
         - 🌄 Upload a background to customize.
         """)
     if st.button("Got it! Start using the app"):
@@ -188,6 +203,15 @@ with cols_q[1]:
     if st.button("🔄 New Quote"):
         st.session_state.quote = get_gemini_quote()
         st.experimental_rerun()
+
+# Voice Assistant with audio upload
+st.subheader("🎙️ Voice Assistant (Upload Audio)")
+uploaded_audio = st.file_uploader("Upload a .wav or .mp3 file for voice recognition:", type=["wav", "mp3"])
+if uploaded_audio is not None:
+    recognized_text = recognize_audio(uploaded_audio)
+    st.success(f"Recognized Text: {recognized_text}")
+    if st.button("🔊 Speak Recognized Text"):
+        speak(recognized_text)
 
 # Ask Gemini
 st.subheader("💬 Ask Gemini AI")
